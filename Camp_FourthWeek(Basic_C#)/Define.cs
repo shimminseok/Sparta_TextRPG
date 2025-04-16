@@ -2,10 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Camp_FourthWeek_Basic_C__
 {
@@ -35,7 +32,6 @@ namespace Camp_FourthWeek_Basic_C__
         Shop,
         Dungeon,
         Rest,
-        Test,
     }
     public enum ItemType
     {
@@ -102,10 +98,6 @@ namespace Camp_FourthWeek_Basic_C__
         public float FinalValue => BaseValue + EquipmentValue + BuffValue;
 
         public Stat() { }
-        public Stat(StatType _type)
-        {
-            Type = _type;
-        }
         public Stat(StatType _type, int _value)
         {
             Type = _type;
@@ -228,6 +220,8 @@ namespace Camp_FourthWeek_Basic_C__
         public string Name { get; private set; }
         public Dictionary<StatType, Stat> Stats { get; private set; }
 
+
+
         public Job(JobType _type,string _name, Dictionary<StatType,Stat> _stat)
         {
             Type = _type;
@@ -235,13 +229,11 @@ namespace Camp_FourthWeek_Basic_C__
             Stats = _stat;
         }
     }
-
     public class SaveData
     {
         public string Name;
         public JobType Job;
         public int Gold;
-        public float Health;
 
         // Item을 전부 변환 시킬 필요가 없음. int값만 가지고 와서 Table에서 가져오는 방식을 사용
         public List<int> Inventory;
@@ -255,7 +247,6 @@ namespace Camp_FourthWeek_Basic_C__
             Inventory = _data.Inventory;
             EquipmentItem = _data.EquipmentItem;
             Gold = _data.Gold;
-            Health = _data.Health;
         }
         public SaveData() { }
     }

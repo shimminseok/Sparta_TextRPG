@@ -6,6 +6,10 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Camp_FourthWeek_Basic_C__
 {
+
+    /// <summary>
+    /// 모든 Action의 부모 클래스이며 모든 Action은 해당 메서드를 참조받아야함.
+    /// </summary>
     public abstract class ActionBase : IAction
     {
         public IAction? PrevAction { get; protected set; }
@@ -36,7 +40,6 @@ namespace Camp_FourthWeek_Basic_C__
                     {
                         if (PrevAction == null && this is MainMenuAction)
                         {
-                            //게임이 종료됨으로 Save
                             GameManager.SaveGame();
                         }
                         else
@@ -167,8 +170,6 @@ namespace Camp_FourthWeek_Basic_C__
             subActionMap[(int)Menu.Shop] = new EnterShopAction(mainAction);
             subActionMap[(int)Menu.Dungeon] = new EnterDungeonAction(mainAction);
             subActionMap[(int)Menu.Rest] = new EnterRestAction(mainAction);
-            //subActionMap[(int)Menu.Test] = new TestAction(mainAction);
-
         }
 
         public override void OnExcute()
@@ -711,7 +712,7 @@ namespace Camp_FourthWeek_Basic_C__
             Console.WriteLine("그리고 상위 액션이 수정됨에 따라 하위 액션이 바뀌게되는 위험성이 존재합니다.");
 
 
-            PrevAction?.Excute();
+            //PrevAction?.Excute();
         }
     }
 }
