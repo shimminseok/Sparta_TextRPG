@@ -36,7 +36,8 @@ namespace Camp_FourthWeek_Basic_C__
                 {
                     player.Stats[equipItem.Stats[i].Type].ModifyEquipmentValue(-equipItem.Stats[i].FinalValue);
                 }
-            }    
+            }
+            EquipmentItems[_type] = null;
         }
 
         public static bool IsEquipped(Item _item) => EquipmentItems.ContainsValue(_item);

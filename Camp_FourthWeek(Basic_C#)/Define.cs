@@ -174,20 +174,16 @@ namespace Camp_FourthWeek_Basic_C__
             RewardGold = _rewardGold;
         }
 
-        public string ClearDungeon()
+        public string ClearDungeon(float dam)
         {
             LevelManager.AddClearCount();
             Random rand = new Random();
             float stat = playerInfo.Stats[RecommendedStat.Type].FinalValue;
             Stat curHP = playerInfo.Stats[StatType.CurHP];
             RewardGold += rand.Next((int)stat, (int)(stat * 2 + 1));
-            float damage = rand.Next(20, 36);
-
-            damage -= stat - RecommendedStat.FinalValue;
-
-
+            
             float originHP = curHP.FinalValue;
-            curHP.ModifyAllValue(damage);
+            curHP.ModifyAllValue(dam);
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("던전 클리어");
@@ -202,11 +198,11 @@ namespace Camp_FourthWeek_Basic_C__
 
             return sb.ToString();
         }
-        public string UnClearDungeon()
+        public string UnClearDungeon(float _dam)
         {
             Random rand = new Random();
 
-            int damage = rand.Next(20, 36) / 2;
+            int damage = (int)(_dam / 2);
             Stat curHP = playerInfo.Stats[StatType.CurHP];
             float originHP = curHP.FinalValue;
 

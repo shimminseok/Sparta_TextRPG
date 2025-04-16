@@ -15,7 +15,7 @@ namespace Camp_FourthWeek_Basic_C__
 
         public static void Init(JobType _job, string _name)
         {
-            PlayerInfo = new PlayerInfo(_job, _name); //스탯 세팅이 되고
+            PlayerInfo = new PlayerInfo(_job, _name);
 
             if(loadData != null)
             {

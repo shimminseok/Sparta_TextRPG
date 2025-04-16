@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using static Camp_FourthWeek_Basic_C__.StringUtil;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Camp_FourthWeek_Basic_C__
 {
@@ -33,7 +34,7 @@ namespace Camp_FourthWeek_Basic_C__
                 {
                     if (id == 0)
                     {
-                        if(PrevAction == null && this is MainMenuAction)
+                        if (PrevAction == null && this is MainMenuAction)
                         {
                             //게임이 종료됨으로 Save
                             GameManager.SaveGame();
@@ -627,28 +628,32 @@ namespace Camp_FourthWeek_Basic_C__
         }
         public override void OnExcute()
         {
+            //던전 도전 조건 판단
             string message = string.Empty;
             Stat dungeonStat = Dungeon.RecommendedStat;
             float playerStat = playerInfo.Stats[dungeonStat.Type].FinalValue;
             StringBuilder sb = new StringBuilder();
+
+            Random rans = new Random();
+            float damage = rans.Next(20, 36);
+            damage -= playerStat - dungeonStat.FinalValue;
             //권장 방어력이 높으면
             if (dungeonStat.FinalValue > playerStat)
             {
                 //던전을 실패할 수있음 40프로 확률
-                Random rans = new Random();
                 float percent = rans.NextSingle();
                 if (percent <= 0.4f)
                 {
-                    message = Dungeon.UnClearDungeon();
+                    message = Dungeon.UnClearDungeon(damage);
                 }
                 else
                 {
-                    message = Dungeon.ClearDungeon();
+                    message = Dungeon.ClearDungeon(damage);
                 }
             }
             else
             {
-                message = Dungeon.ClearDungeon();
+                message = Dungeon.ClearDungeon(damage);
             }
 
 
