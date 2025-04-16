@@ -167,6 +167,8 @@ namespace Camp_FourthWeek_Basic_C__
             subActionMap[(int)Menu.Shop] = new EnterShopAction(mainAction);
             subActionMap[(int)Menu.Dungeon] = new EnterDungeonAction(mainAction);
             subActionMap[(int)Menu.Rest] = new EnterRestAction(mainAction);
+            //subActionMap[(int)Menu.Test] = new TestAction(mainAction);
+
         }
 
         public override void OnExcute()
@@ -629,14 +631,25 @@ namespace Camp_FourthWeek_Basic_C__
         public override void OnExcute()
         {
             //던전 도전 조건 판단
-            string message = string.Empty;
             Stat dungeonStat = Dungeon.RecommendedStat;
             float playerStat = playerInfo.Stats[dungeonStat.Type].FinalValue;
-            StringBuilder sb = new StringBuilder();
+
+            if(35 - playerStat - dungeonStat.FinalValue > playerInfo.Stats[StatType.CurHP].FinalValue)
+            {
+                ((EnterDungeonAction)PrevAction)!.SetFeedBackMessage("체력이 부족합니다.");
+                PrevAction?.Excute();
+                return;
+            }
 
             Random rans = new Random();
             float damage = rans.Next(20, 36);
             damage -= playerStat - dungeonStat.FinalValue;
+
+
+
+            string message = string.Empty;
+            StringBuilder sb = new StringBuilder();
+
             //권장 방어력이 높으면
             if (dungeonStat.FinalValue > playerStat)
             {
@@ -675,6 +688,30 @@ namespace Camp_FourthWeek_Basic_C__
 
 
             return sb.ToString();
+        }
+    }
+
+    public class TestAction : ActionBase
+    {
+        public override string Name => "이건 테스트에오";
+
+        public TestAction(IAction _prevAction)
+        {
+            PrevAction = _prevAction;
+        }
+        public override void OnExcute()
+        {
+            Console.WriteLine("테스트 액션 함수 입니다.");
+            Console.WriteLine("OnExcute에서 해당 액션에 대한 행동을 구현 하고");
+            Console.WriteLine("해당 Action을 실행 시킬 상위 Action에 등록만 해주면 바로 사용이 가능합니다.");
+            Console.WriteLine("상위 Action에서 해당 Action 등록할 때 상위 Action의 IAction Interface를 참조 받아서 사용합니다.");
+            Console.WriteLine("이렇게 하게 되면 상위 Action과의 클래스 결합도가 낮아져서 유지보수가 쉬워집니다.");
+            Console.WriteLine("사실 상위 액션을 상속 받아 쓰면 되는거 아니냐?? 라고 생각 하실수도 있지만");
+            Console.WriteLine("상위 액션을 상속받아 하위 액션을 구현하게되면 하위 액션은 쓸모없는것까지 상속 받게 되어 비효율적입니다.");
+            Console.WriteLine("그리고 상위 액션이 수정됨에 따라 하위 액션이 바뀌게되는 위험성이 존재합니다.");
+
+
+            PrevAction?.Excute();
         }
     }
 }

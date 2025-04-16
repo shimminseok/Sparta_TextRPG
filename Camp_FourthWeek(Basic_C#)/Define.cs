@@ -34,7 +34,8 @@ namespace Camp_FourthWeek_Basic_C__
         Inventory,
         Shop,
         Dungeon,
-        Rest
+        Rest,
+        Test,
     }
     public enum ItemType
     {
@@ -122,6 +123,9 @@ namespace Camp_FourthWeek_Basic_C__
         }
         public void ModifyAllValue(float _value, float _min = 0, float _max = int.MaxValue)
         {
+            if (_value <= 0)
+                _value = 1;
+
             float remainingDam = _value;
             if (remainingDam > 0)
             {
@@ -178,7 +182,7 @@ namespace Camp_FourthWeek_Basic_C__
         {
             LevelManager.AddClearCount();
             Random rand = new Random();
-            float stat = playerInfo.Stats[RecommendedStat.Type].FinalValue;
+            float stat = playerInfo.Stats[StatType.Attack].FinalValue;
             Stat curHP = playerInfo.Stats[StatType.CurHP];
             RewardGold += rand.Next((int)stat, (int)(stat * 2 + 1));
             
