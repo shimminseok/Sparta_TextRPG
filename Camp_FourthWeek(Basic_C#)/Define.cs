@@ -32,6 +32,7 @@ namespace Camp_FourthWeek_Basic_C__
         Shop,
         Dungeon,
         Rest,
+        Reset,
     }
     public enum ItemType
     {
@@ -50,6 +51,7 @@ namespace Camp_FourthWeek_Basic_C__
         string Name { get; }
 
         void Excute();
+        void SetFeedBackMessage(string _message);
     }
 
     public class PlayerInfo

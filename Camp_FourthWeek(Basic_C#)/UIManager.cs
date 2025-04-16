@@ -56,5 +56,29 @@ namespace Camp_FourthWeek_Basic_C__
             }
             return sb;
         }
+
+        public static void PrintStat(Stat _stat)
+        {
+            Console.WriteLine($"{StringUtil.PadRightWithKorean(_stat.GetStatName(), 15)} : {_stat.FinalValue}");
+        }
+        public static void PrintHeager(string _title)
+        {
+            Console.WriteLine("\n===============================");
+            Console.WriteLine(_title);
+            Console.WriteLine("===============================");
+        }
+        public static void PrintError(string _message)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"[오류] {_message}");
+            Console.ResetColor();
+        }
+
+        public static void PrintSuccess(string _message)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"[성공] {_message}");
+            Console.ResetColor();
+        }
     }
 }

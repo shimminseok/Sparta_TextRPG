@@ -86,5 +86,22 @@ namespace Camp_FourthWeek_Basic_C__
             }
 
         }
+
+        public static void DeleteGameData()
+        {
+            if(File.Exists(path))
+            {
+                File.Delete(path);
+                Console.WriteLine("데이터가 삭제되었습니다. \n 잠시후 게임이 재시작 됩니다.");
+                Thread.Sleep(1000);
+                var start = new CreateCharacterAction();
+                start.Excute();
+            }
+            else
+            {
+                Console.WriteLine("삭제할 데이터가 존재하지 않습니다.");
+            }
+
+        }
     }
 }

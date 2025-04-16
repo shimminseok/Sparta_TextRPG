@@ -67,6 +67,11 @@ namespace Camp_FourthWeek_Basic_C__
             Console.WriteLine($"['{Name}]");
             OnExcute();
         }
+
+        public void SetFeedBackMessage(string _message)
+        {
+            FeedBackMessage = _message;
+        }
     }
     public class CreateCharacterAction : ActionBase
     {
@@ -95,7 +100,6 @@ namespace Camp_FourthWeek_Basic_C__
             subActionMap.Clear();
             do
             {
-                Console.Clear();
                 Console.WriteLine("모험가님의 이름을 설정해주세요.");
                 nickName = Console.ReadLine();
             } while (string.IsNullOrEmpty(nickName));
@@ -121,8 +125,6 @@ namespace Camp_FourthWeek_Basic_C__
         }
         public override void OnExcute()
         {
-            Console.Clear();
-
             Console.WriteLine($"플레이 하실 직업을 선택해주세요.");
             Console.WriteLine();
             int index = 1;
@@ -157,7 +159,6 @@ namespace Camp_FourthWeek_Basic_C__
             main.Excute();
         }
     }
-
     public class MainMenuAction : ActionBase
     {
         public override string Name => "마을";
@@ -170,11 +171,11 @@ namespace Camp_FourthWeek_Basic_C__
             subActionMap[(int)Menu.Shop] = new EnterShopAction(mainAction);
             subActionMap[(int)Menu.Dungeon] = new EnterDungeonAction(mainAction);
             subActionMap[(int)Menu.Rest] = new EnterRestAction(mainAction);
+            subActionMap[(int)Menu.Reset] = new EnterResetAction(mainAction);
         }
 
         public override void OnExcute()
         {
-            Console.Clear();
             Console.WriteLine("스파르타 마을에 오신 여러분 환영합니다.");
             Console.WriteLine("이곳에서 던전으로 들어가기전 활동을 할 수 있습니다.");
 
@@ -191,7 +192,6 @@ namespace Camp_FourthWeek_Basic_C__
         }
         public override void OnExcute()
         {
-            Console.Clear();
             Console.WriteLine("캐릭터의 정보가 표시됩니다.");
             Console.WriteLine();
 
@@ -235,7 +235,6 @@ namespace Camp_FourthWeek_Basic_C__
 
         void ShowSaleItems()
         {
-            Console.Clear();
             Console.WriteLine("[보유 골드]");
             Console.WriteLine($"{playerInfo.Gold}G");
             Console.WriteLine();
@@ -271,7 +270,7 @@ namespace Camp_FourthWeek_Basic_C__
         }
         public override void OnExcute()
         {
-            SaleItems = ItemTable.itemDic.Values.Where(item => !InventoryManager.Inventory.Any(x => x.Name == item.Name)).ToList();
+            SaleItems = ItemTable.itemDic.Values.Where(item => !InventoryManager.Inventory.Any(x => x.Key == item.Key)).ToList();
             subActionMap.Clear();
             for (int i = 0; i < SaleItems.Count; i++)
             {
@@ -299,7 +298,6 @@ namespace Camp_FourthWeek_Basic_C__
         }
         void ShowItemInfo()
         {
-            Console.Clear();
             for (int i = 0; i < SaleItems.Count; i++)
             {
                 Item item = SaleItems[i];
@@ -317,10 +315,6 @@ namespace Camp_FourthWeek_Basic_C__
                 Console.WriteLine(sb.ToString());
                 Console.ResetColor();
             }
-        }
-        public void SetFeedBackMessage(string _msg)
-        {
-            FeedBackMessage = _msg;
         }
     }
     public class BuyAction : ActionBase
@@ -346,7 +340,7 @@ namespace Camp_FourthWeek_Basic_C__
                 message = $"{item.Name}을(를) 구매했습니다!";
             }
 
-            ((BuyItemAction)PrevAction!).SetFeedBackMessage(message);
+            PrevAction?.SetFeedBackMessage(message);
             PrevAction?.Excute();
         }
     }
@@ -372,7 +366,6 @@ namespace Camp_FourthWeek_Basic_C__
         }
         void ShowItemInfo()
         {
-            Console.Clear();
             for (int i = 0; i < InventoryManager.Inventory.Count; i++)
             {
                 Item item = InventoryManager.Inventory[i];
@@ -382,10 +375,6 @@ namespace Camp_FourthWeek_Basic_C__
                 Console.WriteLine(sb.ToString());
                 Console.ResetColor();
             }
-        }
-        public void SetFeedBackMessage(string _msg)
-        {
-            FeedBackMessage = _msg;
         }
     }
     public class SellAction : ActionBase
@@ -402,7 +391,7 @@ namespace Camp_FourthWeek_Basic_C__
             playerInfo.Gold += (int)(item.Cost * 0.85);
             InventoryManager.RemoveItem(item);
 
-            ((SellItemAction)PrevAction!).SetFeedBackMessage($"{item.Name}을 판매했습니다. (보유골드 : {playerInfo.Gold})");
+            PrevAction!.SetFeedBackMessage($"{item.Name}을 판매했습니다. (보유골드 : {playerInfo.Gold})");
             PrevAction.Excute();
         }
     }
@@ -420,7 +409,6 @@ namespace Camp_FourthWeek_Basic_C__
         }
         public override void OnExcute()
         {
-            Console.Clear();
             Console.WriteLine("보유 중인 아이템을 관리할 수 있습니다.");
 
             Console.WriteLine("[아이템 목록]");
@@ -455,7 +443,6 @@ namespace Camp_FourthWeek_Basic_C__
         }
         public override void OnExcute()
         {
-            Console.Clear();
             Console.WriteLine("보유 중인 아이템을 장착할 수 있습니다.");
 
             Console.WriteLine("[아이템 목록]");
@@ -511,7 +498,6 @@ namespace Camp_FourthWeek_Basic_C__
 
         public override void OnExcute()
         {
-            Console.Clear();
             string message = string.Empty;
             if (item.IsEquipment)
             {
@@ -546,14 +532,8 @@ namespace Camp_FourthWeek_Basic_C__
         }
         public override void OnExcute()
         {
-            Console.Clear();
             Console.WriteLine($"500G를 내면 체력을 회복할 수 있습니다. (보유 골드 : {playerInfo.Gold})");
             SelectAndRunAction(subActionMap);
-        }
-
-        public void SetFeedBackMessage(string _msg)
-        {
-            FeedBackMessage = _msg;
         }
     }
     public class RecoverAction : ActionBase
@@ -580,7 +560,7 @@ namespace Camp_FourthWeek_Basic_C__
                 message = $"체력이 회복되었습니다 HP {before} -> {curHP.FinalValue}";
             }
 
-            ((EnterRestAction)PrevAction).SetFeedBackMessage(message);
+            PrevAction!.SetFeedBackMessage(message);
             PrevAction.Excute();
         }
     }
@@ -599,7 +579,6 @@ namespace Camp_FourthWeek_Basic_C__
         }
         public override void OnExcute()
         {
-            Console.Clear();
             Console.WriteLine("");
 
             Console.WriteLine("[던전 목록]");
@@ -607,11 +586,6 @@ namespace Camp_FourthWeek_Basic_C__
             Console.WriteLine($"현재 방어력 : {playerInfo.Stats[StatType.Defense].FinalValue}");
 
             SelectAndRunAction(subActionMap);
-        }
-
-        public void SetFeedBackMessage(string _msg)
-        {
-            FeedBackMessage = _msg;
         }
     }
     public class DungeonAction : ActionBase
@@ -637,7 +611,7 @@ namespace Camp_FourthWeek_Basic_C__
 
             if(35 - playerStat - dungeonStat.FinalValue > playerInfo.Stats[StatType.CurHP].FinalValue)
             {
-                ((EnterDungeonAction)PrevAction)!.SetFeedBackMessage("체력이 부족합니다.");
+                PrevAction!.SetFeedBackMessage("체력이 부족합니다.");
                 PrevAction?.Excute();
                 return;
             }
@@ -671,8 +645,8 @@ namespace Camp_FourthWeek_Basic_C__
             }
 
 
-            ((EnterDungeonAction)PrevAction)!.SetFeedBackMessage(message);
-            PrevAction?.Excute();
+            PrevAction!.SetFeedBackMessage(message);
+            PrevAction!.Excute();
 
         }
 
@@ -691,7 +665,32 @@ namespace Camp_FourthWeek_Basic_C__
             return sb.ToString();
         }
     }
+    public class EnterResetAction : ActionBase
+    {
+        public override string Name => "리셋!!!";
 
+        public EnterResetAction(IAction _action)
+        {
+            PrevAction = _action;
+        }
+        public override void OnExcute()
+        {
+            Console.WriteLine("저장된 데이터를 삭제하시겠습니까?");
+            Console.WriteLine("1. 예 \t 2.아니오");
+
+            if(int.TryParse(Console.ReadLine(), out var input))
+            {
+                if(input == 1)
+                {
+                    GameManager.DeleteGameData();
+                }
+                else if(input == 2)
+                {
+                    PrevAction?.Excute();
+                }
+            }
+        }
+    }
     public class TestAction : ActionBase
     {
         public override string Name => "이건 테스트에오";
