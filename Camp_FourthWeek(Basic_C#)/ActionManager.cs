@@ -1,36 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using static Camp_FourthWeek_Basic_C__.Program;
-using static StringUtil;
-
-
-public static class StringUtil
-{
-    public static string PadRightWithKorean(string _str, int _totalWidth)
-    {
-        int width = 0;
-        foreach (char c in _str)
-        {
-            width += IsKorean(c) ? 2 : 1;
-        }
-
-        int padding = _totalWidth - width;
-        if (padding > 0)
-        {
-            return _str + new string(' ', padding);
-        }
-
-        return _str;
-    }
-    static bool IsKorean(char _c)
-    {
-        return (_c >= 0xAC00 && _c <= 0xD7A3);
-    }
-}
+using static Camp_FourthWeek_Basic_C__.StringUtil;
 
 namespace Camp_FourthWeek_Basic_C__
 {
@@ -52,7 +23,7 @@ namespace Camp_FourthWeek_Basic_C__
                 Console.WriteLine($"{action.Key}. {action.Value.Name}");
             }
             Console.WriteLine();
-            Console.WriteLine("0. 나가기");
+            Console.WriteLine($"0. {(PrevAction == null ? "종료하기" : $"{PrevAction.Name}로 되돌아가기")}");
             Console.WriteLine();
             Console.WriteLine(FeedBackMessage);
             Console.WriteLine("원하시는 행동을 입력해주세요.");
@@ -62,7 +33,15 @@ namespace Camp_FourthWeek_Basic_C__
                 {
                     if (id == 0)
                     {
-                        PrevAction?.Excute();
+                        if(PrevAction == null && this is MainMenuAction)
+                        {
+                            //게임이 종료됨으로 Save
+                            GameManager.SaveGame();
+                        }
+                        else
+                        {
+                            PrevAction?.Excute();
+                        }
                         break;
                     }
                     else if (_actionMap.ContainsKey(id))
@@ -76,27 +55,117 @@ namespace Camp_FourthWeek_Basic_C__
                     }
                 }
             }
+            FeedBackMessage = string.Empty;
 
         }
         public void Excute()
         {
-            Console.WriteLine($"{Name}");
+            Console.WriteLine($"['{Name}]");
             OnExcute();
         }
     }
+    public class CreateCharacterAction : ActionBase
+    {
+        public override string Name => "캐릭터 생성";
+
+        public CreateCharacterAction()
+        {
+            subActionMap = new Dictionary<int, IAction>()
+            {
+                {1, new CreateNickNameAction() }
+            };
+        }
+        public override void OnExcute()
+        {
+            Console.WriteLine("스파르타마을에 오신 모험가님을 환영합니다.");
+            SelectAndRunAction(subActionMap);
+        }
+    }
+    public class CreateNickNameAction : ActionBase
+    {
+        public override string Name => "닉네임 설정";
+
+        string? nickName = string.Empty;
+        public override void OnExcute()
+        {
+            subActionMap.Clear();
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("모험가님의 이름을 설정해주세요.");
+                nickName = Console.ReadLine();
+            } while (string.IsNullOrEmpty(nickName));
+            Console.WriteLine($"{nickName}님 안녕하세요.");
+            subActionMap = new Dictionary<int, IAction>
+                {
+                    {1,  new SelectedJobAction(nickName)}
+                };
+            SelectAndRunAction(subActionMap);
+
+        }
+    }
+    public class SelectedJobAction : ActionBase
+    {
+        public override string Name => "직업 선택";
+
+        public SelectedJobAction(string _name)
+        {
+            foreach (var job in JobTable.JobDataDic.Values)
+            {
+                subActionMap.Add((int)job.Type, new SelectJobAction(job, _name));
+            }
+        }
+        public override void OnExcute()
+        {
+            Console.Clear();
+
+            Console.WriteLine($"플레이 하실 직업을 선택해주세요.");
+            Console.WriteLine();
+            int index = 1;
+            foreach (var job in JobTable.JobDataDic.Values)
+            {
+                Console.Write($"\t{job.Name}");
+            }
+            Console.WriteLine();
+            SelectAndRunAction(subActionMap);
+        }
+    }
+    public class SelectJobAction : ActionBase
+    {
+        public override string Name => Job.Name;
+        public Job Job { get; private set; }
+
+        public string CharacterName { get; private set; }
+        public SelectJobAction(Job _job, string _name)
+        {
+            Job = _job;
+            CharacterName = _name;
+        }
+        public override void OnExcute()
+        {
+            Console.WriteLine($"직업 : {Job.Name}을 선택하셨습니다.");
+
+            Console.WriteLine("잠시 후 게임이 시작됩니다.");
+            GameManager.Init(Job.Type, CharacterName);
+            MainMenuAction main = new MainMenuAction();
+            Thread.Sleep(1000);
+            main.InitializeMainActions(main);
+            main.Excute();
+        }
+    }
+
     public class MainMenuAction : ActionBase
     {
         public override string Name => "마을";
 
-        public Dictionary<int, IAction> mainActions = new Dictionary<int, IAction>();
         public void InitializeMainActions(MainMenuAction mainAction)
         {
-            mainActions.Clear();
-            mainActions[(int)Menu.ShowInfo] = new EnterCharacterInfoAction(mainAction);
-            mainActions[(int)Menu.Inventory] = new EnterInventoryAction(mainAction);
-            mainActions[(int)Menu.Shop] = new EnterShopAction(mainAction);
-            mainActions[(int)Menu.Dungeon] = new EnterDungeonAction(mainAction);
-            mainActions[(int)Menu.Rest] = new EnterRestAction(mainAction);
+            subActionMap.Clear();
+            subActionMap[(int)Menu.ShowInfo] = new EnterCharacterInfoAction(mainAction);
+            subActionMap[(int)Menu.Inventory] = new EnterInventoryAction(mainAction);
+            subActionMap[(int)Menu.Shop] = new EnterShopAction(mainAction);
+            subActionMap[(int)Menu.Dungeon] = new EnterDungeonAction(mainAction);
+            subActionMap[(int)Menu.Rest] = new EnterRestAction(mainAction);
         }
 
         public override void OnExcute()
@@ -105,7 +174,7 @@ namespace Camp_FourthWeek_Basic_C__
             Console.WriteLine("스파르타 마을에 오신 여러분 환영합니다.");
             Console.WriteLine("이곳에서 던전으로 들어가기전 활동을 할 수 있습니다.");
 
-            SelectAndRunAction(mainActions);
+            SelectAndRunAction(subActionMap);
         }
     }
     public class EnterCharacterInfoAction : ActionBase
@@ -122,8 +191,8 @@ namespace Camp_FourthWeek_Basic_C__
             Console.WriteLine("캐릭터의 정보가 표시됩니다.");
             Console.WriteLine();
 
-            Console.WriteLine($"Lv. {playerInfo.Level}");
-            Console.WriteLine(PadRightWithKorean($"{PadRightWithKorean("직업", 9)} : {playerInfo.Job.ToString()}", 10));
+            Console.WriteLine($"Lv. {LevelManager.CurrentLevel} 이름 : {playerInfo.Name}");
+            Console.WriteLine(PadRightWithKorean($"{PadRightWithKorean("직업", 9)} : {playerInfo.Job.Name}", 10));
             foreach (var stat in playerInfo.Stats.Values)
             {
                 Console.WriteLine($"{PadRightWithKorean(stat.GetStatName(), 9)} : {PadRightWithKorean(stat.FinalValue.ToString("N0"), 9)} +({stat.EquipmentValue})");
@@ -134,7 +203,7 @@ namespace Camp_FourthWeek_Basic_C__
             SelectAndRunAction(subActionMap);
         }
     }
-    public class EnterShopAction : ActionBase, IHasSubActions
+    public class EnterShopAction : ActionBase
     {
         public override string Name => "상점";
 
@@ -158,7 +227,6 @@ namespace Camp_FourthWeek_Basic_C__
             Console.WriteLine();
             ShowSaleItems();
             SelectAndRunAction(subActionMap);
-
         }
 
         void ShowSaleItems()
@@ -171,41 +239,24 @@ namespace Camp_FourthWeek_Basic_C__
             for (int i = 0; i < SaleItems.Count; i++)
             {
                 Item item = SaleItems[i];
-                StringBuilder sb = new StringBuilder();
-                sb.Append($"{PadRightWithKorean($"- {i + 1}", 5)}");
-
-
-                sb.Append($"{PadRightWithKorean($"{item.Name}", 18)}");
-                for (int j = 0; j < item.Stats.Count; j++)
-                {
-                    sb.Append($" | {PadRightWithKorean($"{item.Stats[j].GetStatName()} +{item.Stats[j].FinalValue}", 10)} ");
-
-                }
-                sb.Append(PadRightWithKorean("", (2 / item.Stats.Count) * 10));
+                StringBuilder sb = UIManager.ItemPrinter(item, i);
                 sb.Append(" | ");
-                sb.Append($"{PadRightWithKorean($"{item.Descript}", 50)}");
-
                 if (InventoryManager.Inventory.Exists(x => x.Name == item.Name))
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    sb.Append("| 구매완료");
+                    sb.Append($"{PadRightWithKorean($"구매완료", 10)}");
                 }
                 else
                 {
-                    sb.Append($"| {PadRightWithKorean($"{item.Cost}G", 5)}");
+                    sb.Append($"{PadRightWithKorean($"{item.Cost}G", 10)}");
                 }
                 sb.Append(" | ");
                 Console.WriteLine(sb.ToString());
                 Console.ResetColor();
             }
         }
-
-        IAction IHasSubActions.GetSubAction(int _key)
-        {
-            return subActionMap[_key];
-        }
     }
-    public class BuyItemAction : ActionBase, IHasSubActions
+    public class BuyItemAction : ActionBase
     {
         public override string Name => "상점 - 아이템 구매";
         List<Item> SaleItems = new List<Item>();
@@ -248,36 +299,20 @@ namespace Camp_FourthWeek_Basic_C__
             for (int i = 0; i < SaleItems.Count; i++)
             {
                 Item item = SaleItems[i];
-                StringBuilder sb = new StringBuilder();
-                sb.Append($"{PadRightWithKorean($"- {i + 1}", 5)}");
-
-
-                sb.Append($"{PadRightWithKorean($"{item.Name}", 18)}");
-                for (int j = 0; j < item.Stats.Count; j++)
-                {
-                    sb.Append($" | {PadRightWithKorean($"{item.Stats[j].GetStatName()} +{item.Stats[j].FinalValue}", 10)} ");
-
-                }
-                sb.Append(" | ");
-                sb.Append($"{PadRightWithKorean($"{item.Descript}", 50)}");
-
+                StringBuilder sb = UIManager.ItemPrinter(item, i);
                 if (InventoryManager.Inventory.Exists(x => x.Name == item.Name))
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    sb.Append("구매완료");
+                    sb.Append($"{PadRightWithKorean($"구매완료", 10)}");
                 }
                 else
                 {
-                    sb.Append($"| {PadRightWithKorean($"{item.Cost}G", 5)}");
+                    sb.Append($"{PadRightWithKorean($"{item.Cost}G", 10)}");
                 }
+                sb.Append(" | ");
                 Console.WriteLine(sb.ToString());
                 Console.ResetColor();
             }
-        }
-
-        IAction IHasSubActions.GetSubAction(int _key)
-        {
-            return subActionMap[_key];
         }
         public void SetFeedBackMessage(string _msg)
         {
@@ -337,16 +372,7 @@ namespace Camp_FourthWeek_Basic_C__
             for (int i = 0; i < InventoryManager.Inventory.Count; i++)
             {
                 Item item = InventoryManager.Inventory[i];
-                StringBuilder sb = new StringBuilder();
-                sb.Append($"{PadRightWithKorean($"- {i + 1}", 5)}");
-
-
-                sb.Append($"{PadRightWithKorean($"{item.Name}", 18)}");
-                for (int j = 0; j < item.Stats.Count; j++)
-                {
-                    sb.Append($" | {PadRightWithKorean($"{item.Stats[j].GetStatName()} +{item.Stats[j].FinalValue}", 10)} ");
-
-                }
+                StringBuilder sb = UIManager.ItemPrinter(item, i, false);
                 sb.Append($"| {PadRightWithKorean($"{item.Cost * 0.85}G", 5)}");
 
                 Console.WriteLine(sb.ToString());
@@ -376,7 +402,7 @@ namespace Camp_FourthWeek_Basic_C__
             PrevAction.Excute();
         }
     }
-    public class EnterInventoryAction : ActionBase, IHasSubActions
+    public class EnterInventoryAction : ActionBase
     {
         public override string Name => "인벤토리";
 
@@ -397,38 +423,25 @@ namespace Camp_FourthWeek_Basic_C__
             for (int i = 0; i < InventoryManager.Inventory.Count; i++)
             {
                 Item item = InventoryManager.Inventory[i];
-                StringBuilder sb = new StringBuilder();
-                sb.Append($"{PadRightWithKorean($"- {i + 1}", 5)}");
+                StringBuilder sb = UIManager.ItemPrinter(item, i);
+
                 if (item.IsEquipment)
                 {
+                    int idx = sb.ToString().IndexOf(item.Name);
                     Console.ForegroundColor = ConsoleColor.Green;
-                    sb.Append("[E]");
+                    sb.Insert(idx, "[E]");
                 }
-
-                sb.Append($"{PadRightWithKorean($"{item.Name}", 18)}");
-                for (int j = 0; j < item.Stats.Count; j++)
-                {
-                    sb.Append($" | {PadRightWithKorean($"{item.Stats[j].GetStatName()} +{item.Stats[j].FinalValue}", 10)} ");
-
-                }
-                sb.Append(" | ");
-                sb.Append($"{PadRightWithKorean($"{item.Descript}", 50)}");
-
-
                 Console.WriteLine(sb.ToString());
                 Console.ResetColor();
 
             }
-            Console.WriteLine();
             SelectAndRunAction(subActionMap);
         }
-
-        IAction IHasSubActions.GetSubAction(int _key)
-        {
-            return subActionMap[_key];
-        }
     }
-    public class EquipItemManagementAction : ActionBase, IHasSubActions
+    /// <summary>
+    /// 장착을 관리하는 Action
+    /// </summary>
+    public class EquipItemManagementAction : ActionBase
     {
         public override string Name => "인벤토리 - 장착 관리";
 
@@ -477,12 +490,10 @@ namespace Camp_FourthWeek_Basic_C__
             Console.WriteLine();
             SelectAndRunAction(subActionMap);
         }
-
-        IAction IHasSubActions.GetSubAction(int _key)
-        {
-            return subActionMap[_key];
-        }
     }
+    /// <summary>
+    /// 아이템을 장착하는 Action
+    /// </summary>
     public class EquipAction : ActionBase
     {
         Item item;
@@ -531,9 +542,14 @@ namespace Camp_FourthWeek_Basic_C__
         }
         public override void OnExcute()
         {
+            Console.Clear();
             Console.WriteLine($"500G를 내면 체력을 회복할 수 있습니다. (보유 골드 : {playerInfo.Gold})");
-
             SelectAndRunAction(subActionMap);
+        }
+
+        public void SetFeedBackMessage(string _msg)
+        {
+            FeedBackMessage = _msg;
         }
     }
     public class RecoverAction : ActionBase
@@ -553,11 +569,14 @@ namespace Camp_FourthWeek_Basic_C__
             }
             else
             {
+
                 Stat curHP = playerInfo.Stats[StatType.CurHP];
-                curHP.ModifyBaseValue(100, 0, playerInfo.Stats[StatType.MaxHP].FinalValue);
-                message = $"체력이 회복되었습니다 현재 체력 : {curHP.FinalValue}";
+                float before = curHP.FinalValue;
+                curHP.ModifyBaseValue(playerInfo.Stats[StatType.MaxHP].FinalValue, 0, playerInfo.Stats[StatType.MaxHP].FinalValue);
+                message = $"체력이 회복되었습니다 HP {before} -> {curHP.FinalValue}";
             }
 
+            ((EnterRestAction)PrevAction).SetFeedBackMessage(message);
             PrevAction.Excute();
         }
     }
@@ -580,6 +599,9 @@ namespace Camp_FourthWeek_Basic_C__
             Console.WriteLine("");
 
             Console.WriteLine("[던전 목록]");
+            Console.WriteLine($"현재 공격력 : {playerInfo.Stats[StatType.Attack].FinalValue}");
+            Console.WriteLine($"현재 방어력 : {playerInfo.Stats[StatType.Defense].FinalValue}");
+
             SelectAndRunAction(subActionMap);
         }
 
@@ -607,8 +629,8 @@ namespace Camp_FourthWeek_Basic_C__
         {
             string message = string.Empty;
             Stat dungeonStat = Dungeon.RecommendedStat;
-            int playerStat = playerInfo.Stats[dungeonStat.Type].FinalValue;
-            StringBuilder sb =new StringBuilder();
+            float playerStat = playerInfo.Stats[dungeonStat.Type].FinalValue;
+            StringBuilder sb = new StringBuilder();
             //권장 방어력이 높으면
             if (dungeonStat.FinalValue > playerStat)
             {

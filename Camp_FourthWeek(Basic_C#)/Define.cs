@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
@@ -10,7 +12,9 @@ namespace Camp_FourthWeek_Basic_C__
     #region[Enum]
     public enum JobType
     {
+        None,
         Warrior,
+        Assassin
     }
     public enum StatType
     {
@@ -50,47 +54,37 @@ namespace Camp_FourthWeek_Basic_C__
 
         void Excute();
     }
-    public interface IHasSubActions
-    {
-        IAction GetSubAction(int _key);
-    }
 
     public class PlayerInfo
     {
-        public int Level = 1;
+        public string Name { get; private set; }
+        public Job Job { get; private set; }
+        public Dictionary<StatType, Stat> Stats { get; private set; } = new Dictionary<StatType, Stat>();
+
         public int Gold = 1500;
-        public JobType Job;
-        public JobBase JobBase;
-
-        public Dictionary<StatType, Stat> Stats = new Dictionary<StatType, Stat>();
-        public Dictionary<ItemType, Item> EquipmentItems = new Dictionary<ItemType, Item>();
-
-        //public List<Skill> SkillList = new List<Skill>();
-
-        public PlayerInfo(JobType _job)
+        public PlayerInfo(JobType _job, string _name)
         {
-            switch (_job)
-            {
-                case JobType.Warrior:
-                    JobBase = new Warrior(_job);
-                    break;
-            }
-            Stats = JobBase.Stats.ToDictionary();
+            Job = JobTable.JobDataDic[_job];
+            Stats = Job.Stats.ToDictionary();
+            Name = _name;
         }
     }
 
     public class Item
     {
+        public int Key {  get; private set; }
         public string Name = string.Empty;
         public ItemType ItemType;
-        public bool IsEquipment = false;
+        [JsonProperty]
+        public bool IsEquipment => EquipmentManager.IsEquipped(this);
         public List<Stat> Stats = new List<Stat>();
 
         public int Cost;
         public string Descript = string.Empty;
 
-        public Item(string _name, ItemType _type,List<Stat> _stats, string _descript, int _cost)
+        public Item(int _key,string _name, ItemType _type,List<Stat> _stats, string _descript, int _cost)
         {
+            Key = _key;
             Name = _name;
             ItemType = _type;
             Stats = _stats;
@@ -101,11 +95,12 @@ namespace Camp_FourthWeek_Basic_C__
     public class Stat
     {
         public StatType Type;
-        public int BaseValue = 0;
-        public int EquipmentValue = 0;
-        public int BuffValue = 0;
-        public int FinalValue => BaseValue + EquipmentValue + BuffValue;
+        public float BaseValue = 0;
+        public float EquipmentValue = 0;
+        public float BuffValue = 0;
+        public float FinalValue => BaseValue + EquipmentValue + BuffValue;
 
+        public Stat() { }
         public Stat(StatType _type)
         {
             Type = _type;
@@ -115,22 +110,22 @@ namespace Camp_FourthWeek_Basic_C__
             Type = _type;
             BaseValue = _value;
         }
-        public void ModifyBaseValue(int _value, int _min = 0, int _max = int.MaxValue)
+        public void ModifyBaseValue(float _value, float _min = 0, float _max = int.MaxValue)
         {
             BaseValue += _value;
             BaseValue = Math.Clamp(BaseValue, _min, _max);
         }
-        public void ModifyEquipmentValue(int _value)
+        public void ModifyEquipmentValue(float _value)
         {
             EquipmentValue += _value;
             EquipmentValue = Math.Clamp(EquipmentValue, 0, int.MaxValue);
         }
-        public void ModifyAllValue(int _value, int _min = 0, int _max = int.MaxValue)
+        public void ModifyAllValue(float _value, float _min = 0, float _max = int.MaxValue)
         {
-            int remainingDam = _value;
+            float remainingDam = _value;
             if (remainingDam > 0)
             {
-                int damToEquip = (int)Math.Min(remainingDam, EquipmentValue);
+                float damToEquip = Math.Min(remainingDam, EquipmentValue);
                 ModifyEquipmentValue(-damToEquip);
                 remainingDam -= damToEquip;
             }
@@ -181,17 +176,17 @@ namespace Camp_FourthWeek_Basic_C__
 
         public string ClearDungeon()
         {
+            LevelManager.AddClearCount();
             Random rand = new Random();
-
-            int stat = playerInfo.Stats[RecommendedStat.Type].FinalValue;
+            float stat = playerInfo.Stats[RecommendedStat.Type].FinalValue;
             Stat curHP = playerInfo.Stats[StatType.CurHP];
-            RewardGold += rand.Next(stat, (stat * 2 + 1));
-            int damage = rand.Next(20, 36);
+            RewardGold += rand.Next((int)stat, (int)(stat * 2 + 1));
+            float damage = rand.Next(20, 36);
 
             damage -= stat - RecommendedStat.FinalValue;
 
 
-            int originHP = curHP.FinalValue;
+            float originHP = curHP.FinalValue;
             curHP.ModifyAllValue(damage);
 
             StringBuilder sb = new StringBuilder();
@@ -213,7 +208,7 @@ namespace Camp_FourthWeek_Basic_C__
 
             int damage = rand.Next(20, 36) / 2;
             Stat curHP = playerInfo.Stats[StatType.CurHP];
-            int originHP = curHP.FinalValue;
+            float originHP = curHP.FinalValue;
 
             curHP.ModifyAllValue(damage);
             StringBuilder sb = new StringBuilder();
@@ -227,34 +222,42 @@ namespace Camp_FourthWeek_Basic_C__
         }
     }
 
-    public class JobBase
+    public class Job
     {
-        public JobType Type { get; protected set; }
-        public string Name { get; protected set; }
-        public Dictionary<StatType, Stat> Stats { get; protected set; }
+        public JobType Type { get; private set; }
+        public string Name { get; private set; }
+        public Dictionary<StatType, Stat> Stats { get; private set; }
 
-
+        public Job(JobType _type,string _name, Dictionary<StatType,Stat> _stat)
+        {
+            Type = _type;
+            Name = _name;
+            Stats = _stat;
+        }
     }
 
-
-    public class Warrior : JobBase
+    public class SaveData
     {
-        public Warrior(JobType type)
-        {
-            Type = type;
-            Name = "전사";
-            Stats = new Dictionary<StatType, Stat>
-            {
-                {StatType.Attack, new Stat(StatType.Attack,10) },
-                {StatType.Defense, new Stat(StatType.Defense,5) },
-                {StatType.MaxHP, new Stat(StatType.MaxHP,100) },
-                {StatType.CurHP, new Stat(StatType.CurHP,100) },
-                {StatType.MaxMP, new Stat(StatType.MaxMP,100) },
-                {StatType.CurMP, new Stat(StatType.CurMP,100) },
-                {StatType.CriticalChance, new Stat(StatType.CriticalChance,3) },
+        public string Name;
+        public JobType Job;
+        public int Gold;
+        public float Health;
 
-            };
+        // Item을 전부 변환 시킬 필요가 없음. int값만 가지고 와서 Table에서 가져오는 방식을 사용
+        public List<int> Inventory;
+        public List<int> EquipmentItem;
+        public int DungeonClearCount;
+        public SaveData(SaveData _data)
+        {
+            Name= _data.Name;
+            Job = _data.Job;
+            DungeonClearCount = _data.DungeonClearCount;
+            Inventory = _data.Inventory;
+            EquipmentItem = _data.EquipmentItem;
+            Gold = _data.Gold;
+            Health = _data.Health;
         }
+        public SaveData() { }
     }
 
 

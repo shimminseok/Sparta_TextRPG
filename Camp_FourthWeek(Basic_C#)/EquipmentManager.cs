@@ -8,36 +8,37 @@ namespace Camp_FourthWeek_Basic_C__
 {
     internal static class EquipmentManager
     {
+        public static Dictionary<ItemType, Item> EquipmentItems = new Dictionary<ItemType, Item>();
+
         public static void EquipmentItem(Item _equipItem)
         {
             PlayerInfo player = GameManager.PlayerInfo;
-            if(player.EquipmentItems.TryGetValue(_equipItem.ItemType, out var item))
+            if(EquipmentItems.TryGetValue(_equipItem.ItemType, out var item))
             {
                 //장착한 아이템이 있다면
                 UnequipItem(item.ItemType);
             }
-            _equipItem.IsEquipment = true;
-
             for (int i = 0; i < _equipItem.Stats.Count; i++)
             {
                 Stat stat = _equipItem.Stats[i];
                 player?.Stats[stat.Type].ModifyEquipmentValue(stat.FinalValue);
             }
-            player.EquipmentItems[_equipItem.ItemType] = _equipItem;
+            EquipmentItems[_equipItem.ItemType] = _equipItem;
         }
 
         public static void UnequipItem(ItemType _type)
         {
             PlayerInfo player = GameManager.PlayerInfo;
-            Item equipItem = player.EquipmentItems[_type];
+            Item equipItem = EquipmentItems[_type];
             if (equipItem != null)
             {
                 for (int i = 0; i < equipItem.Stats.Count; i++)
                 {
                     player.Stats[equipItem.Stats[i].Type].ModifyEquipmentValue(-equipItem.Stats[i].FinalValue);
                 }
-                equipItem.IsEquipment = false;
             }    
         }
+
+        public static bool IsEquipped(Item _item) => EquipmentItems.ContainsValue(_item);
     }
 }

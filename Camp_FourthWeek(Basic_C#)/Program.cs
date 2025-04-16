@@ -15,24 +15,13 @@
         {
             TextRPG.StartGame();
         }
-        
-        #region[Interface]
-
-        #endregion[Interface]
-        #region[Action Class]
-        
-
-        #endregion[Action Class]
-
 
         public static class TextRPG
         {
             public static void StartGame()
             {
-                GameManager.Init(JobType.Warrior);
-                var mainAction = new MainMenuAction();
-                mainAction.InitializeMainActions(mainAction);
-                mainAction.Excute();
+
+                GameManager.LoadGame();
             }
         }
     }
