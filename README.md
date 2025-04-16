@@ -1,7 +1,9 @@
 # Sparta_TextRPG
 내일 배움캠프 C#기초강의 개인 프로젝트인 TextRPG입니다
 
-#**주요 기능**
+
+**주요 기능**
+
 
 플레이어 상태 확인: 직업, 레벨, 능력치, 골드 확인
 
@@ -17,7 +19,9 @@
 
 데이터 저장/불러오기: Newtonsoft.Json을 이용한 JSON 기반 세이브 시스템
 
+
 #**아키텍처 설계**
+
 
 상태 기반 액션 시스템
 
@@ -27,7 +31,9 @@ IAction 인터페이스와 ActionBase 추상 클래스를 중심으로 상태 �
 
 subActionMap을 통해 유저 입력 → 다음 상태 전환 구조
 
+
 #**SOLID 원칙 적용**
+
 
 SRP: 각 매니저 클래스(Inventory, Equipment 등)는 하나의 책임만 가짐
 
@@ -37,7 +43,9 @@ LSP/ISP: IAction, IHasSubActions로 분리
 
 DIP: 일부 static 매니저 구조 → 향후 DI 리팩토링 가능
 
+
 #**테이블 기반 구조**
+
 
 ItemTable, JobTable, DungeonTable 등 데이터 테이블 분리
 
