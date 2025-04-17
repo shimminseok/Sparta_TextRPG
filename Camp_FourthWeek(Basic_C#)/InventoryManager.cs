@@ -22,6 +22,9 @@ public class InventoryManager
 
     public void RemoveItem(Item _item)
     {
+        if (EquipmentManager.IsEquipped(_item))
+            EquipmentManager.UnequipItem(_item.ItemType);
+
         Inventory.Remove(_item);
     }
 }

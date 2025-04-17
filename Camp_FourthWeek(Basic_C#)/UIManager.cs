@@ -11,15 +11,18 @@ namespace Camp_FourthWeek_Basic_C__
     {
         public static string PadRightWithKorean(string _str, int _totalWidth)
         {
-            var width = _str.Sum(c => IsKorean(c) ? 2 : 1);
+            int width = _str.Sum(c => IsKorean(c) ? 2 : 1);
 
-            var padding = _totalWidth - width;
+            int padding = _totalWidth - width;
+            StringBuilder sb = new StringBuilder();
+            sb.Append(_str);
             if (padding > 0)
             {
-                return _str + new string(' ', padding);
+                sb.Append(new string(' ', padding));
+                return sb.ToString();
             }
 
-            return _str;
+            return sb.ToString();
         }
 
         private static bool IsKorean(char _c)
@@ -43,12 +46,13 @@ namespace Camp_FourthWeek_Basic_C__
             var statBuilder = new StringBuilder();
             foreach (var stat in _item.Stats)
             {
-                statBuilder.Append($"{PadRightWithKorean($"{stat.GetStatName()}",10)}");
-                statBuilder.Append($"{PadRightWithKorean($"+{stat.FinalValue}",5)}");
+                statBuilder.Append($"{PadRightWithKorean($"{stat.GetStatName()}", 10)}");
+                statBuilder.Append($"{PadRightWithKorean($"+{stat.FinalValue}", 5)}");
             }
+
             sb.Append($"{PadRightWithKorean(statBuilder.ToString(), 35)}");
             if (_isShowDescript)
-                sb.Append($" | {PadRightWithKorean(_item.Description,50)}");
+                sb.Append($" | {PadRightWithKorean(_item.Description, 50)}");
             return sb;
         }
 
@@ -56,12 +60,14 @@ namespace Camp_FourthWeek_Basic_C__
         {
             Console.WriteLine($"{StringUtil.PadRightWithKorean(_stat.GetStatName(), 15)} : {_stat.FinalValue}");
         }
+
         public static void PrintHeager(string _title)
         {
             Console.WriteLine("\n===============================");
             Console.WriteLine(_title);
             Console.WriteLine("===============================");
         }
+
         public static void PrintError(string _message)
         {
             Console.ForegroundColor = ConsoleColor.Red;

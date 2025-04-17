@@ -64,6 +64,10 @@ public abstract class ActionBase : IAction
 
                 Console.WriteLine("잘못된 입력입니다.");
             }
+            else
+            {
+                Console.WriteLine("잘못된 입력입니다.");
+            }
 
 
         _feedBackMessage = string.Empty;
@@ -470,6 +474,7 @@ public class EquipItemManagementAction : ActionBase
 
     public override void OnExcute()
     {
+        SubActionMap.Clear();
         Console.WriteLine("보유 중인 아이템을 장착할 수 있습니다.");
         Console.WriteLine("[아이템 목록]");
         for (var i = 0; i < InventoryManager.Instance.Inventory.Count; i++)
