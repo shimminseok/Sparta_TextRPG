@@ -13,15 +13,15 @@
     {
         static void Main(string[] args)
         {
-            TextRPG.StartGame();
+            TextRPG textRPG = new TextRPG();
+            textRPG.StartGame();
         }
-
-        public static class TextRPG
+    }
+    public class TextRPG
+    {
+        public void StartGame()
         {
-            public static void StartGame()
-            {
-                GameManager.LoadGame();
-            }
+            GameManager.Instance.LoadGame();
         }
     }
 }

@@ -26,8 +26,8 @@ namespace Camp_FourthWeek_Basic_C__
         public static void UpdateLevel()
         {
             CurrentLevel = ClearDungeonCount + 1;
-            GameManager.PlayerInfo.Stats[StatType.Attack].ModifyBaseValue(0.5f);
-            GameManager.PlayerInfo.Stats[StatType.Defense].ModifyBaseValue(1f);
+            GameManager.Instance.PlayerInfo?.Stats[StatType.Attack].ModifyBaseValue(0.5f);
+            GameManager.Instance.PlayerInfo?.Stats[StatType.Defense].ModifyBaseValue(1f);
         }
     }
 }

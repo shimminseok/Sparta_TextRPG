@@ -12,7 +12,7 @@ namespace Camp_FourthWeek_Basic_C__
 
         public static void EquipmentItem(Item _equipItem)
         {
-            PlayerInfo player = GameManager.PlayerInfo;
+            PlayerInfo player = GameManager.Instance.PlayerInfo;
             if(EquipmentItems.TryGetValue(_equipItem.ItemType, out var item))
             {
                 //장착한 아이템이 있다면
@@ -28,7 +28,7 @@ namespace Camp_FourthWeek_Basic_C__
 
         public static void UnequipItem(ItemType _type)
         {
-            PlayerInfo player = GameManager.PlayerInfo;
+            PlayerInfo player = GameManager.Instance.PlayerInfo;
             Item equipItem = EquipmentItems[_type];
             if (equipItem != null)
             {

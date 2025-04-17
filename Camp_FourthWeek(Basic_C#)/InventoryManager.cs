@@ -1,21 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Camp_FourthWeek_Basic_C__;
-namespace Camp_FourthWeek_Basic_C__
+﻿namespace Camp_FourthWeek_Basic_C__;
+
+public class InventoryManager
 {
-    internal static class InventoryManager
+    private static InventoryManager instance;
+
+    public static InventoryManager Instance
     {
-        public static List<Item> Inventory { get; private set; } = new List<Item>();
-        public static void AddItem(Item _item)
+        get
         {
-            Inventory.Add(_item);
+            if (instance == null) instance = new InventoryManager();
+            return instance;
         }
-        public static void RemoveItem(Item _item)
-        {
-            Inventory.Remove(_item);
-        }
+    }
+
+    public List<Item> Inventory { get; } = new();
+
+    public void AddItem(Item _item)
+    {
+        Inventory.Add(_item);
+    }
+
+    public void RemoveItem(Item _item)
+    {
+        Inventory.Remove(_item);
     }
 }
