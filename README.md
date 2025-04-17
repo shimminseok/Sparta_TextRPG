@@ -39,7 +39,7 @@ SRP: 각 매니저 클래스(Inventory, Equipment 등)는 하나의 책임만 �
 
 OCP: 새로운 행동은 클래스만 추가하면 동작 가능
 
-LSP/ISP: IAction, IHasSubActions로 분리
+LSP/ISP: IAction 분리
 
 DIP: 일부 static 매니저 구조 → 향후 DI 리팩토링 가능
 
