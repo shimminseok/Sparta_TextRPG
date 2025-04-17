@@ -17,7 +17,7 @@ namespace Camp_FourthWeek_Basic_C__
 
         protected PlayerInfo playerInfo = GameManager.PlayerInfo;
         protected Dictionary<int, IAction> subActionMap = new Dictionary<int, IAction>();
-        protected string FeedBackMessage = string.Empty;
+        string FeedBackMessage = string.Empty;
         public abstract void OnExcute();
 
         public void SelectAndRunAction(Dictionary<int, IAction> _actionMap)
