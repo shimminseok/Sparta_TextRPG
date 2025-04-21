@@ -8,7 +8,7 @@ namespace Camp_FourthWeek_Basic_C__;
 /// </summary>
 public abstract class ActionBase : IAction
 {
-    private string _feedBackMessage = string.Empty;
+    private string feedBackMessage = string.Empty;
     protected IAction? PrevAction;
     protected Dictionary<int, IAction> SubActionMap = new();
     protected PlayerInfo PlayerInfo { get; } = GameManager.Instance.PlayerInfo;
@@ -23,7 +23,7 @@ public abstract class ActionBase : IAction
 
     public void SetFeedBackMessage(string _message)
     {
-        _feedBackMessage = _message;
+        feedBackMessage = _message;
     }
 
     public abstract void OnExcute();
@@ -35,7 +35,7 @@ public abstract class ActionBase : IAction
         Console.WriteLine();
         Console.WriteLine($"0. {(PrevAction == null ? "종료하기" : $"{PrevAction.Name}로 되돌아가기")}");
         Console.WriteLine();
-        Console.WriteLine(_feedBackMessage);
+        Console.WriteLine(feedBackMessage);
         Console.WriteLine("원하시는 행동을 입력해주세요.");
         while (true)
             if (int.TryParse(Console.ReadLine(), out var id))
@@ -70,7 +70,7 @@ public abstract class ActionBase : IAction
             }
 
 
-        _feedBackMessage = string.Empty;
+        feedBackMessage = string.Empty;
     }
 }
 
